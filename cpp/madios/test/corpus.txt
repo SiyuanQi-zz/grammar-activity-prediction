@@ -1,0 +1,21 @@
+ *  Cindy believes that Joe believes that to please is easy  #
+ *  Cindy believes that Cindy believes that to read is tough  #
+ *  Pam thinks that Jim believes that to please is tough  #
+ *  Beth believes that George believes that to please is easy  #
+ *  Pam believes that Cindy believes that to read is easy  #
+ *  Beth thinks that Beth thinks that to read is tough  #
+ *  that Cindy is easy to read annoys Cindy  #
+ *  that the cat is eager to please disturbs the cat  #
+ *  that the cow is easy to read annoys the horse  #
+ *  that Cindy is eager to please bothers the dog  #
+ *  that the horse is easy to please annoys Jim  #
+ *  Pam thinks that Cindy thinks that to please is easy  #
+ *  that the dog is easy to read worries the horse  #
+ *  Cindy believes that George believes that to read is easy  #
+ *  Pam thinks that Pam believes that to read is easy  #
+ *  Beth believes that Joe believes that to read is tough  #
+ *  Cindy believes that Cindy believes that to please is easy  #
+ *  that the horse is tough to please disturbs the cat  #
+ *  Beth believes that Joe believes that to read is tough  #
+ *  Cindy thinks that Joe believes that to please is easy  #
+

@@ -1,0 +1,132 @@
+This is an implementation of the ADIOS algorithm. This implementation is more efficient than the original author's but it can produce different outputs due to undocumented approximations used in the original author's implementation.
+
+One possible modification to the original ADIOS algorithm is to favour Significant Patterns that are shorter in length and therefore more likely to represent basic grammar units. Applying this approach to sentences at word level, the algorithm does learn grammars that are more consistent with intuitions but when applied to sentences at character level, the algorithm tend to find non-sensical word fragments that do not correspond to intuition. I suspect that additional weighting based on the pattern's length and number of occurrences is required. The relevant code is commented out in RDSGraph.cpp at lines 356-359 and 362-365, if you wish to experiment.
+
+Although it does not affect the correctness of the grammar produced by the current implementation, it can be made more efficient by grouping identitical distilled paths into a single production rule.
+
+
+Usage:
+ModifiedADIOS <filename> <eta> <alpha> <context_size> <coverage> ---OPTIONAL--- <number_of_new_sequences>
+
+<filename>,     file name of the input corpus
+<eta>,          threshold of detecting divergence in the RDS graph, usually set to 0.9
+<alpha>,        significance test threshold, usually set to 0.01 or 0.1
+<context_size>, size of the context window used for search for Equivalence Class, usually set to 5 or 4, a value less 3 will mean that no                 equivalence class can be found.
+<coverage>,     threhold for bootstrapping Equivalence classes, usually set to 0.65. Higher values will result in less bootstrapping.
+
+the optional parameter <number_of_new_sequences> asks the executable to generate new sentences from the distilled grammar.
+
+
+An example raw corpus file (* and # are the start and end delimiters):
+
+ *  Cindy believes that Joe believes that to please is easy  #
+ *  Cindy believes that Cindy believes that to read is tough  #
+ *  Pam thinks that Jim believes that to please is tough  #
+ *  Beth believes that George believes that to please is easy  #
+ *  Pam believes that Cindy believes that to read is easy  #
+ *  Beth thinks that Beth thinks that to read is tough  #
+ *  that Cindy is easy to read annoys Cindy  #
+ *  that the cat is eager to please disturbs the cat  #
+ *  that the cow is easy to read annoys the horse  #
+ *  that Cindy is eager to please bothers the dog  #
+ *  that the horse is easy to please annoys Jim  #
+ *  Pam thinks that Cindy thinks that to please is easy  #
+ *  that the dog is easy to read worries the horse  #
+ *  Cindy believes that George believes that to read is easy  #
+ *  Pam thinks that Pam believes that to read is easy  #
+ *  Beth believes that Joe believes that to read is tough  #
+ *  Cindy believes that Cindy believes that to please is easy  #
+ *  that the horse is tough to please disturbs the cat  #
+ *  Beth believes that Joe believes that to read is tough  #
+ *  Cindy thinks that Joe believes that to please is easy  #
+
+
+
+with eta = 0.9, alpha = 0.01, context_size = 5 and coverage = 0.65, the following grammar is distilled:
+
+Lexicon 0: START   ------->  0  []
+Lexicon 1: END   ------->  0  []
+Lexicon 2: Cindy   ------->  1  [31]
+Lexicon 3: believes   ------->  1  [27]
+Lexicon 4: that   ------->  1  [28]
+Lexicon 5: Joe   ------->  1  [31]
+Lexicon 6: to   ------->  2  [30   35]
+Lexicon 7: please   ------->  1  [29]
+Lexicon 8: is   ------->  2  [30   37]
+Lexicon 9: easy   ------->  1  [36]
+Lexicon 10: read   ------->  1  [29]
+Lexicon 11: tough   ------->  0  []
+Lexicon 12: Pam   ------->  0  []
+Lexicon 13: thinks   ------->  1  [27]
+Lexicon 14: Jim   ------->  1  [31]
+Lexicon 15: Beth   ------->  1  [31]
+Lexicon 16: George   ------->  0  []
+Lexicon 17: annoys   ------->  0  []
+Lexicon 18: the   ------->  1  [34]
+Lexicon 19: cat   ------->  1  [33]
+Lexicon 20: eager   ------->  1  [36]
+Lexicon 21: disturbs   ------->  0  []
+Lexicon 22: cow   ------->  1  [33]
+Lexicon 23: horse   ------->  1  [33]
+Lexicon 24: bothers   ------->  0  []
+Lexicon 25: dog   ------->  1  [33]
+Lexicon 26: worries   ------->  0  []
+Lexicon 27: E[believes | thinks]   ------->  1  [28]
+Lexicon 28: P[E27 - that]   ------->  2  [30   32]
+Lexicon 29: E[read | please]   ------->  2  [30   35]
+Lexicon 30: P[P28 - to - E29 - is]   ------->  1  [32]
+Lexicon 31: E[Cindy | Jim | Beth | Joe]   ------->  1  [32]
+Lexicon 32: P[P28 - E31 - P30]   ------->  0  []
+Lexicon 33: E[cat | cow | horse | dog]   ------->  1  [34]
+Lexicon 34: P[the - E33]   ------->  0  []
+Lexicon 35: P[to - E29]   ------->  1  [37]
+Lexicon 36: E[easy | eager]   ------->  1  [37]
+Lexicon 37: P[is - E36 - P35]   ------->  0  []
+
+the numbers at the right hand side of the arrow indicates the number of patterns that contains the current lexicon followed by the index of the those patterns in [].
+
+
+
+The function RDSGraph::convert2PCFG(), outputs the equivalent probabilistic context free grammar, which can be loaded by the Earley parser. Note that start and end delimiters are included as part of the grammar:
+
+S _
+19 E27 --> believes
+7 E27 --> thinks
+1 P28 --> E27 that
+10 E29 --> read
+10 E29 --> please
+1 P30 --> P28 to E29 is
+4 E31 --> Cindy
+1 E31 --> Jim
+1 E31 --> Beth
+4 E31 --> Joe
+1 P32 --> P28 E31 P30
+3 E33 --> cat
+1 E33 --> cow
+4 E33 --> horse
+2 E33 --> dog
+1 P34 --> the E33
+1 P35 --> to E29
+4 E36 --> easy
+2 E36 --> eager
+1 P37 --> is E36 P35
+1 S --> Cindy P32 easy
+1 S --> Cindy P32 tough
+1 S --> Pam P32 tough
+1 S --> Beth P28 George P30 easy
+1 S --> Pam P32 easy
+1 S --> Beth P32 tough
+1 S --> that Cindy P37 annoys Cindy
+1 S --> that P34 P37 disturbs P34
+1 S --> that P34 P37 annoys P34
+1 S --> that Cindy P37 bothers P34
+1 S --> that P34 P37 annoys Jim
+1 S --> Pam P32 easy
+1 S --> that P34 P37 worries P34
+1 S --> Cindy P28 George P30 easy
+1 S --> Pam P28 Pam P30 easy
+1 S --> Beth P32 tough
+1 S --> Cindy P32 easy
+1 S --> that P34 is tough P35 disturbs P34
+1 S --> Beth P32 tough
+1 S --> Cindy P32 easy

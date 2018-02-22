@@ -1,0 +1,9 @@
+numpy
+scipy
+sklearn
+matplotlib
+tabulate
+nltk
+plyfile
+Pillow
+opencv-python
