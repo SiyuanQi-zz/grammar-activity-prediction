@@ -70,6 +70,9 @@ def result_output(x_1_train, x_2_train, y_train, x_1_test, x_2_test, y_test, mod
         json.dump(predict_train_result, f)
 
 
+        
+# train function using appropriate parameters
+        
 def train(x_1_train, x_2_train, y_train, x_1_test, x_2_test, y_test, model_path):
     batch_size = 16
     model_name = 'layer_3_with_dropout_0.5_dropoutWU_0.4_maxlen_200_epoch_300_feature_completion.h5'
