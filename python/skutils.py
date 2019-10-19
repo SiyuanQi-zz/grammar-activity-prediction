@@ -104,6 +104,9 @@ def plot_skeleton_with_points(skeleton_sequence, pts_sequences, frames):
     plt.show()
 
 
+    
+#visualizes object
+    
 def visualize_skeleton_obj(skeletons, obj_positions):
     for sequence_id in obj_positions:
         print sequence_id
